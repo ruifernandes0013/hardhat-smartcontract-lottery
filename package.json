@@ -1,0 +1,25 @@
+{
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "dot": "^1.1.3",
+    "dotenv": "^16.5.0",
+    "hardhat": "^2.23.0",
+    "solhint": "^5.0.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@chainlink/contracts": "^1.3.0",
+    "hardhat-gas-reporter": "^1.0.10"
+  },
+  "name": "hardhat-smartcontract-lottery",
+  "version": "1.0.0",
+  "main": "hardhat.config.js",
+  "scripts": {
+    "deploy": "NETWORK=${NETWORK:-localhost}; VERIFY_ARG=$( [ \"$NETWORK\" != \"localhost\" ] && echo '--verify' ); npx hardhat ignition deploy ./ignition/modules/Raffle.ts --network $NETWORK $VERIFY_ARG"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
