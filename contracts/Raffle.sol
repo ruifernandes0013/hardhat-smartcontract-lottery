@@ -8,6 +8,7 @@ import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/autom
 error Raffle_NotEnoughValue();
 error Raffle_TransferFailed();
 error Raffle_NotOpen();
+error Raffle_VRFRequestFailed();
 error Raffle_UpkeepNotNeeded(uint256 balance, uint256 playersLength, uint256 raffleState);
 
 /**
@@ -103,20 +104,25 @@ contract Raffle is VRFConsumerBaseV2Plus, AutomationCompatibleInterface {
       );
     }
 
-    s_raffleState = RaffleState.CALCULATING;
-    // Will revert if subscription is not set and funded.
-    uint256 requestId = s_vrfCoordinator.requestRandomWords(
-      VRFV2PlusClient.RandomWordsRequest({
-        keyHash: i_keyHash,
-        subId: i_subscriptionId,
-        requestConfirmations: REQUEST_CONFIRMATIONS,
-        callbackGasLimit: CALL_BACK_GAS_LIMIT,
-        numWords: NUM_WORDS,
-        extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
-      })
-    );
-
-    emit RequestedRaffleWinner(requestId);
+    try
+      s_vrfCoordinator.requestRandomWords(
+        VRFV2PlusClient.RandomWordsRequest({
+          keyHash: i_keyHash,
+          subId: i_subscriptionId,
+          requestConfirmations: REQUEST_CONFIRMATIONS,
+          callbackGasLimit: CALL_BACK_GAS_LIMIT,
+          numWords: NUM_WORDS,
+          extraArgs: VRFV2PlusClient._argsToBytes(
+            VRFV2PlusClient.ExtraArgsV1({nativePayment: true})
+          )
+        })
+      )
+    returns (uint256 requestId) {
+      s_raffleState = RaffleState.CALCULATING;
+      emit RequestedRaffleWinner(requestId);
+    } catch {
+      revert Raffle_VRFRequestFailed();
+    }
   }
 
   /**
